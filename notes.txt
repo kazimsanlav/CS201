@@ -1,0 +1,321 @@
+-------------------------C++----------------------
+
+<> The address-of operator (&) can only be used on the RHS.
+<> Initialize a pointer to null during declaration is a good software engineering practice.
+<> In an reference variable is passed into a function, the function works on the original copy (instead of a clone copy in pass-by-value). Changes inside the function are reflected outside the function.
+<> A reference is similar to a pointer. In many cases, a reference can be used as an alternative to pointer, in particular, for the function parameter.
+
+||||||||||||||||||2.1  References (or Aliases) (&)|||||||||||
+
+<> The meaning of symbol & is different in an expression and in a declaration. 
+<> When it is used in an expression, & denotes the address-of operator, which returns the address of a variable, e.g., if number is an int variable, &number returns the address of the variable number (this has been described in the above section).
+<> However, when & is used in a declaration (including function formal parameters), it is part of the type identifier and is used to declare a reference variable (or reference or alias or alternate name). It is used to provide another name, or another reference, or alias to an existing variable.
+
+||||||||||||||||2.3  References vs. Pointers||||||||||||||||
+
+<> Pointers and references are equivalent, except:
+	-> A reference is a name constant for an address. You need to initialize the reference during declaration.
+	int & iRef;   // Error: 'iRef' declared as reference but not initialized
+	-> Once a reference is established to a variable, you cannot change the reference to reference another variable.
+	-> To get the value pointed to by a pointer, you need to use the dereferencing operator * (e.g., if pNumber is a int pointer, *pNumber returns the value pointed to by pNumber. It is called dereferencing or indirection). To assign an address of a variable into a pointer, you need to use the address-of operator & (e.g., pNumber = &number).
+	On the other hand, referencing and dereferencing are done on the references implicitly. For example, if refNumber is a reference (alias) to another int variable, refNumber returns the value of the variable. No explicit dereferencing operator * should be used. Furthermore, to assign an address of a variable to a reference variable, no address-of operator & is needed.
+<> int main() 
+{
+   int number1 = 88, number2 = 22;
+ 
+   // Create a pointer pointing to number1
+   int * pNumber1 = &number1;  // Explicit referencing
+   *pNumber1 = 99;             // Explicit dereferencing
+   cout << *pNumber1 << endl;  // 99
+   cout << &number1 << endl;   // 0x22ff18
+   cout << pNumber1 << endl;   // 0x22ff18 (content of the pointer variable - same as above)
+   cout << &pNumber1 << endl;  // 0x22ff10 (address of the pointer variable)
+   pNumber1 = &number2;        // Pointer can be reassigned to store another address
+ 
+   // Create a reference (alias) to number1
+   int & refNumber1 = number1;  // Implicit referencing (NOT &number1)
+   refNumber1 = 11;             // Implicit dereferencing (NOT *refNumber1)
+   cout << refNumber1 << endl;  // 11
+   cout << &number1 << endl;    // 0x22ff18
+   cout << &refNumber1 << endl; // 0x22ff18
+   //refNumber1 = &number2;     // Error! Reference cannot be re-assigned
+                                // error: invalid conversion from 'int*' to 'int'
+   refNumber1 = number2;        // refNumber1 is still an alias to number1.
+                                // Assign value of number2 (22) to refNumber1 (and number1).
+   number2++;   
+   cout << refNumber1 << endl;  // 22
+   cout << number1 << endl;     // 22
+   cout << number2 << endl;     // 23
+}	
+<> Reference can be treated as a const pointer. It has to be initialized during declaration, and its content cannot be changed.
+<> A reference allows you to manipulate an object using pointer, but without the pointer syntax of referencing and dereferencing.
+
+|||||||||2.4  Pass-By-Reference into Functions with Reference Arguments vs. Pointer Arguments||||||||||
+
+----Pass-by-Value-----
+
+<> In C/C++, by default, arguments are passed into functions by value (except arrays which is treated as pointers).
+<> That is, a clone copy of the argument is made and passed into the function. Changes to the clone copy inside the function has no effect to the original argument in the caller. In other words, the called function has no access to the variables in the caller.
+
+------Pass-by-Reference with Pointer Arguments-------
+
+/* Pass-by-reference using pointer (TestPassByPointer.cpp) */
+#include <iostream>
+using namespace std;
+ 
+void square(int *);
+ 
+int main() {
+   int number = 8;
+   cout <<  "In main(): " << &number << endl;  // 0x22ff1c
+   cout << number << endl;   // 8
+   square(&number);          // Explicit referencing to pass an address
+   cout << number << endl;   // 64
+}
+ 
+void square(int * pNumber) {  // Function takes an int pointer (non-const)
+   cout <<  "In square(): " << pNumber << endl;  // 0x22ff1c
+   *pNumber *= *pNumber;      // Explicit de-referencing to get the value pointed-to
+}
+
+---------Pass-by-Reference with Reference Arguments---------
+
+/* Pass-by-reference using reference (TestPassByReference.cpp) */
+#include <iostream>
+using namespace std;
+ 
+void square(int &);
+ 
+int main() {
+   int number = 8;
+   cout <<  "In main(): " << &number << endl;  // 0x22ff1c
+   cout << number << endl;  // 8
+   square(number);          // Implicit referencing (without '&')
+   cout << number << endl;  // 64
+}
+ 
+void square(int & rNumber) {  // Function takes an int reference (non-const)
+   cout <<  "In square(): " << &rNumber << endl;  // 0x22ff1c
+   rNumber *= rNumber;        // Implicit de-referencing (without '*')
+}
+
+<> Recall that references are to be initialized during declaration. In the case of function formal parameter, the references are initialized when the function is invoked, to the caller's arguments.
+
+------"const" Function Reference/Pointer Parameters--------
+
+<> A const function formal parameter cannot be modified inside the function. Use const whenever possible as it protects you from inadvertently modifying the parameter and protects you against many programming errors.
+
+<> A const function parameter can receive both const and non-const argument. On the other hand, a non-const function reference/pointer parameter can only receive non-const argument. For example,
+
+/* Test Function const and non-const parameter (FuncationConstParameter.cpp) */
+#include <iostream>
+using namespace std;
+ 
+int squareConst(const int);
+int squareNonConst(int);
+int squareConstRef(const int &);
+int squareNonConstRef(int &);
+ 
+int main() {
+   int number = 8;
+   const int constNumber = 9;
+   cout << squareConst(number) << endl;
+   cout << squareConst(constNumber) << endl;
+   cout << squareNonConst(number) << endl;
+   cout << squareNonConst(constNumber) << endl;
+ 
+   cout << squareConstRef(number) << endl;
+   cout << squareConstRef(constNumber) << endl;
+   cout << squareNonConstRef(number) << endl;
+   // cout << squareNonConstRef(constNumber) << endl;
+       // error: invalid initialization of reference of
+       //  type 'int&' from expression of type 'const int'
+}
+ 
+int squareConst(const int number) {
+   // number *= number;  // error: assignment of read-only parameter
+   return number * number;
+}
+ 
+int squareNonConst(int number) {  // non-const parameter
+   number *= number;
+   return number;
+}
+ 
+int squareConstRef(const int & number) {  // const reference
+   return number * number;
+}
+ 
+int squareNonConstRef(int & number) {  // non-const reference
+   return number * number;
+}
+  
+|||||||||||||||   2.5  Passing the Function's Return Value  ||||||||||||||
+ 
+/* Passing back return value using reference (TestPassByReferenceReturn.cpp) */
+#include <iostream>
+using namespace std;
+ 
+int & squareRef(int &);
+int * squarePtr(int *);
+ 
+int main() {
+   int number1 = 8;
+   cout <<  "In main() &number1: " << &number1 << endl;  // 0x22ff14
+   int & result = squareRef(number1);
+   cout <<  "In main() &result: " << &result << endl;  // 0x22ff14
+   cout << result << endl;   // 64
+   cout << number1 << endl;  // 64
+ 
+   int number2 = 9;
+   cout <<  "In main() &number2: " << &number2 << endl;  // 0x22ff10
+   int * pResult = squarePtr(&number2);
+   cout <<  "In main() pResult: " << pResult << endl;  // 0x22ff10
+   cout << *pResult << endl;   // 81
+   cout << number2 << endl;    // 81
+}
+ 
+int & squareRef(int & rNumber) {
+   cout <<  "In squareRef(): " << &rNumber << endl;  // 0x22ff14
+   rNumber *= rNumber;
+   return rNumber;
+}
+ 
+int * squarePtr(int * pNumber) {
+   cout <<  "In squarePtr(): " << pNumber << endl;  // 0x22ff10
+   *pNumber *= *pNumber;
+   return pNumber;
+}
+
+------You should not pass Function's local variable as return value by reference-----
+
+/* Test passing the result (TestPassResultLocal.cpp) */
+#include <iostream>
+using namespace std;
+ 
+int * squarePtr(int);
+int & squareRef(int);
+ 
+int main() {
+   int number = 8;
+   cout << number << endl;  // 8
+   cout << *squarePtr(number) << endl;  // ??
+   cout << squareRef(number) << endl;   // ??
+}
+ 
+int * squarePtr(int number) {
+   int localResult = number * number;
+   return &localResult;
+      // warning: address of local variable 'localResult' returned
+}
+ 
+int & squareRef(int number) {
+   int localResult = number * number;
+   return localResult;
+      // warning: reference of local variable 'localResult' returned
+} 
+
+<> This program has a serious logical error, as local variable of function is passed back as return value by reference. Local variable has local scope within the function, and its value is destroyed after the function exits. The GCC compiler is kind enough to issue a warning (but not error).
+<> It is safe to return a reference that is passed into the function as an argument. See earlier examples.
+
+--------Passing Dynamically Allocated Memory as Return Value by Reference-------
+
+<> Instead, you need to dynamically allocate a variable for the return value, and return it by reference.
+
+/* Test passing the result (TestPassResultNew.cpp) */
+#include <iostream>
+using namespace std;
+ 
+int * squarePtr(int);
+int & squareRef(int);
+ 
+int main() {
+   int number = 8;
+   cout << number << endl;  // 8
+   cout << *squarePtr(number) << endl;  // 64
+   cout << squareRef(number) << endl;   // 64
+}
+ 
+int * squarePtr(int number) {
+   int * dynamicAllocatedResult = new int(number * number);
+   return dynamicAllocatedResult;
+}
+ 
+int & squareRef(int number) {
+   int * dynamicAllocatedResult = new int(number * number);
+   return *dynamicAllocatedResult;
+}
+
+||||||||||||||||||||||      3.  Dynamic Memory Allocation        ||||||||||||||||||||
+
+-----------   3.1  new and delete Operators   -----------
+
+<> the storage can be dynamically allocated at runtime, via a new operator. 
+<> In C++, whenever you allocate a piece of memory dynamically via new, you need to use delete to remove the storage (i.e., to return the storage to the heap).
+<> The new operation returns a pointer to the memory allocated. The delete operator takes a pointer (pointing to the memory allocated via new) as its sole argument.
+<> Observe that new and delete operators work on pointer.
+<> 
+// use an initializer to initialize a fundamental type (such as int, double)
+int * p1 = new int(88);
+double * p2 = new double(1.23);
+ 
+// C++11 brace initialization syntax
+int * p1 = new int {88};
+double * p2 = new double {1.23};
+ 
+// invoke a constructor to initialize an object (such as Date, Time)
+Date * date1 = new Date(1999, 1, 1);  
+Time * time1 = new Time(12, 34, 56);
+
+<> You can dynamically allocate storage for global pointers inside a function. Dynamically allocated storage inside the function remains even after the function exits.
+<> / Dynamically allocate global pointers (TestDynamicAllocation.cpp)
+#include <iostream>
+using namespace std;
+ 
+int * p1, * p2;  // Global int pointers
+ 
+// This function allocates storage for the int*
+// which is available outside the function
+void allocate() {
+   p1 = new int;     // Allocate memory, initial content unknown
+   *p1 = 88;         // Assign value into location pointed to by pointer
+   p2 = new int(99); // Allocate and initialize
+}
+ 
+int main() {
+   allocate();
+   cout << *p1 << endl;  // 88
+   cout << *p2 << endl;  // 99
+   delete p1;  // Deallocate
+   delete p2;
+   return 0;
+}
+
+----------- 3.2  new[] and delete[] Operators -------
+
+Dynamic array is allocated at runtime rather than compile-time, via the new[] operator. To remove the storage, you need to use the delete[] operator (instead of simply delete). For example,
+
+
+||||||||||||| 4.  Pointer, Array and Function ||||||||||||||
+
+-------4.1  Array is Treated as Pointer------
+
+<> In C/C++, an array's name is a pointer, pointing to the first element (index 0) of the array. For example, suppose that numbers is an int array, numbers is a also an int pointer, pointing at the first element of the array. 
+<> That is, numbers is the same as &numbers[0]. Consequently, *numbers is number[0]; *(numbers+i) is numbers[i].
+<> The operation sizeof(arrayName) returns the total bytes of the array. You can derive the length (size) of the array by dividing it with the size of an element (e.g. element 0). For example,
+
+-----------4.4  Passing Array In/Out of a Function-----------
+
+<> the following declarations are equivalent:
+int max(int numbers[], int size);
+int max(int *numbers, int size);
+int max(int number[50], int size);
+
+<> They will be treated as int* by the compiler, as follow. The size of the array given in [] is ignored.
+int max(int*, int);
+
+<> Array is passed by reference into the function, because a pointer is passed instead of a clone copy. If the array is modified inside the function, the modifications are applied to the caller's copy. You could declare the array parameter as const to prevent the array from being modified inside the function.
+
+<> The size of the array is not part of the array parameter, and needs to be passed in another int parameter. Compiler is not able to deduce the array size from the array pointer, and does not perform array bound check.
+
+<> 

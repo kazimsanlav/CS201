@@ -1,0 +1,11 @@
+﻿  main.cpp
+  Team.cpp
+c:\users\kazim\desktop\c++\cs201hw3b\team.cpp(77): warning C4018: '<': signed/unsigned mismatch
+c:\users\kazim\desktop\c++\cs201hw3b\team.cpp(85): warning C4018: '<': signed/unsigned mismatch
+  Player.cpp
+  BasketReg.cpp
+c:\users\kazim\desktop\c++\cs201hw3b\basketreg.cpp(191): warning C4018: '<': signed/unsigned mismatch
+c:\users\kazim\desktop\c++\cs201hw3b\basketreg.cpp(199): warning C4018: '<': signed/unsigned mismatch
+  Generating Code...
+c:\users\kazim\desktop\c++\cs201hw3b\team.cpp(72): warning C4715: 'Team::operator=': not all control paths return a value
+  cs201hw3b.vcxproj -> C:\Users\kazIm\Desktop\C++\cs201hw3b\Debug\cs201hw3b.exe
